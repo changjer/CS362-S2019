@@ -645,20 +645,20 @@ int getCost(int cardNumber)
 int smithyCardEffect(int card, struct gameState *state, int handPos, int currentPlayer){
      for (int i = 0; i < 3; i++)
      {
-          drawCard(card, state); 
+          drawCard(currentPlayer, state); 
      }
      //discard card from hand
-     discardCard(handPos, currentPlayer, state, 1);  
+     discardCard(handPos, currentPlayer, state, 1);   
      return 0;
 }
 
 int villageCardEffect(int card, struct gameState *state, int handPos, int currentPlayer){
 	//+1 Card
-	drawCard(handPos, state);  
+	drawCard(handPos, state); 
 
 	//+2 Actions
-	state->numActions = state->numActions + 3; 
-
+	state->numActions = state->numActions + 2; 
+	
      //discard played card from hand
      discardCard(handPos, currentPlayer, state, 0);
      return 0;
@@ -729,55 +729,60 @@ int adventurerCardEffect(int card, int drawntreasure, struct gameState *state, i
 			shuffle(currentPlayer, state);
 		}
      	drawCard(currentPlayer, state);
-		
+			
 		cardDrawn = state->hand[currentPlayer][state->handCount[currentPlayer]-1];//top card of hand is most recently drawn card.
-     	if (cardDrawn == copper || cardDrawn == silver || cardDrawn == gold){
-//			drawntreasure++;
-			 
+//		printf("cardDrawn= %d\n", cardDrawn);
+		if (cardDrawn == copper || cardDrawn == silver || cardDrawn == gold){
+			   drawntreasure++; //Removed bug to cause infinite loop. Correct way to increment drawntreasure counter.
+
 		}
 		else{
-			temphand[z]=cardDrawn;
-			state->handCount[currentPlayer]--; //this should just remove the top card (the      most recently drawn one).
-			z++;
+			   temphand[z]=cardDrawn;
+			   state->handCount[currentPlayer]--; //this should just remove the top card (the most recently drawn one).
+			   z++;
 		}
 	}
 	while(z-1>=0){
-	     state->discard[currentPlayer][state->discardCount[currentPlayer]++]=temphand[z-1]     ; // discard all cards in play that have been drawn
-//		z=z-1;
-		
+		   state->discard[currentPlayer][state->discardCount[currentPlayer]++]=temphand[z-1]     ; // discard all cards in play that have been drawn
+		   z=z-1;
+
 	}
+
 	return 0;
+
 }
 
 int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState *state, int handPos, int *bonus)
 {
-  int i;
-  int j;
-  int k;
-  int x;
-  int index;
-  int currentPlayer = whoseTurn(state);
-  int nextPlayer = currentPlayer + 1;
+	   int i;
+	   int j;
+	   int k;
+	   int x;
+	   int index;
+	   int currentPlayer = whoseTurn(state);
+	   int nextPlayer = currentPlayer + 1;
 
-  int tributeRevealedCards[2] = {-1, -1};
-  int temphand[MAX_HAND];// moved above the if statement
-  int drawntreasure=0;
-  int cardDrawn = -1;
-  int z = 0;// this is the counter for the temp hand
-  if (nextPlayer > (state->numPlayers - 1)){
-    nextPlayer = 0;
-  }
-  
-	
-  //uses switch to select card and perform actions
-  switch( card ) 
-    {
-    case adventurer:
-    adventurerCardEffect(card, drawntreasure, state, currentPlayer, temphand, z, cardDrawn);
+	   int tributeRevealedCards[2] = {-1, -1};
+	   int temphand[MAX_HAND];// moved above the if statement
+	   int drawntreasure=0;
+	   int cardDrawn = -1;
+	   int z = 0;// this is the counter for the temp hand
+	   if (nextPlayer > (state->numPlayers - 1)){
+			 nextPlayer = 0;
+	   }
+	  
+	   //uses switch to select card and perform actions
+	   switch( card ) 
+	   {
+			 case adventurer:
+				    adventurerCardEffect(card, drawntreasure, state, currentPlayer, temphand, z, cardDrawn);
+				    return 0;
+
 
     case council_room:
 
 	council_roomCardEffect(card, state, handPos, currentPlayer);
+	return 0;
     
     case feast:
       //gain card with cost up to 5
@@ -837,6 +842,7 @@ int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState
 			
     case mine:
 	mineCardEffect(card, state, handPos, currentPlayer, choice1, choice2);
+	return 0;
     
     case remodel:
       j = state->hand[currentPlayer][choice1];  //store card we will trash
@@ -867,9 +873,11 @@ int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState
     case smithy:
       //+3 Cards
       smithyCardEffect(card, state, handPos, currentPlayer);
+	return 0;
 		
     case village:
 	villageCardEffect(card, state, handPos, currentPlayer);
+	return 0;
     
     case baron:
       state->numBuys++;//Increase buys by 1!
