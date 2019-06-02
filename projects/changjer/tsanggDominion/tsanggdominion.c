@@ -655,7 +655,7 @@ int rfAdventurer(struct gameState *state) {
     drawCard(currentPlayer, state);
     cardDrawn = state->hand[currentPlayer][state->handCount[currentPlayer]-1];
     if (cardDrawn == copper || cardDrawn == silver || cardDrawn == gold)
-      // Bug #1: Forever loop, should increment drawntreasure count instead of decrement
+      // Bug 1: decrement instead of increment treasure, loop will never end
       drawntreasure--;
     else {
       temphand[z] = cardDrawn;
@@ -674,7 +674,7 @@ int rfSmithy(struct gameState *state, int handPos) {
   int currentPlayer = whoseTurn(state);
   for (int i = 0; i < 3; i++)
     drawCard(currentPlayer, state);
-  // Bug 2: Flag 0 is for discard, Flag 1 is for trash. Incorrect flag set, should be discarded instead of trashed (correct = 0).
+  // Bug 2: incorrect flag set, card will be trashed instead of discarded
   discardCard(handPos, currentPlayer, state, 1);
   return 0;
 }
@@ -693,7 +693,7 @@ int rfSteward(struct gameState *state, int choice1, int choice2, int choice3, in
     drawCard(currentPlayer, state);
     drawCard(currentPlayer, state);
   }
-  // incorrect condition, checks choice2 instead of choice1
+  // Bug 3: incorrect condition, checks choice2 instead of choice1
   else if (choice2 == 2)
     state->coins = state->coins + 2;
   else {
@@ -716,8 +716,7 @@ int rfTreasureMap(struct gameState *state, int handPos) {
   if (index > -1) {
     discardCard(handPos, currentPlayer, state, 1);
     discardCard(index, currentPlayer, state, 1);
-    // Bug 3: Additional "=" added for loop condtion. Should be only "i < 4".
-    // This causes the player to gain 5 gold instead of 4 gold. 
+    // Bug 4: incorrect loop condition, will gain 5 gold instead of 4
     for (int i = 0; i <= 4; i++)
       gainCard(gold, state, 1, currentPlayer);
     return 1;
